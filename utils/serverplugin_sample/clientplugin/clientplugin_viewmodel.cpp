@@ -1,0 +1,123 @@
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//
+// Purpose: Basic BOT handling.
+//
+// $Workfile:     $
+// $Date:         $
+//
+//-----------------------------------------------------------------------------
+// $Log: $
+//
+// $NoKeywords: $
+//=============================================================================//
+
+#include "interface.h"
+#include "filesystem.h"
+#undef VECTOR_NO_SLOW_OPERATIONS
+#include "mathlib/vector.h"
+
+#include "eiface.h"
+#include "edict.h"
+#include "game/server/iplayerinfo.h"
+#include "igameevents.h"
+#include "vstdlib/random.h"
+#include "../../game/shared/in_buttons.h"
+#include "../../game/shared/shareddefs.h"
+#include "../utils.h"
+#include "../sigscan.h"
+#include "icliententity.h"
+#include "../minhook/minhook.h"
+#include "cdll_int.h"
+#include "utlvector.h"
+#include "terrorviewmodel.h"
+#include "clientplugin_viewmodel.h"
+
+#define USE_REALTIME
+#define USE_LASTTIMESTAMP
+#include "interpolatedvar.h"
+// -------------------------------------------------------------------------
+// Variables so that CInterpolatedVar can work
+bool CInterpolationContext::s_bAllowExtrapolation = false;
+float CInterpolationContext::s_flLastTimeStamp = 0.f;
+ConVar cl_extrapolate_amount = ConVar("", "", FCVAR_HIDDEN);
+// -------------------------------------------------------------------------
+
+ESourceEngine eEngine = k_eOther;
+
+CGlobalVars* gpGlobals = NULL;
+IVEngineClient* engineclient = NULL;
+ICvar* pcvar = NULL;
+
+TerrorViewModel tvm;
+TerrorViewModel* gpTerrorViewModel = &tvm;
+
+bool ClientPlugin_Viewmodel::Viewmodel_Run(CreateInterfaceFn interfaceFactory)
+{
+	if (!CSigScan::SetDllMemInfo("client.dll")) {
+		Warning("Failed to set client.dll memory info for signature scan!\n");
+		return false;
+	}
+
+	static char modDir[MAX_PATH];
+	if (Q_strlen(modDir) == 0)
+	{
+		const char* gamedir = CommandLine()->ParmValue("-game", CommandLine()->ParmValue("-defaultgamedir", "hl2"));
+		Q_strncpy(modDir, gamedir, sizeof(modDir));
+		if (strchr(modDir, '/') || strchr(modDir, '\\'))
+		{
+			Q_StripLastDir(modDir, sizeof(modDir));
+			int dirlen = Q_strlen(modDir);
+			Q_strncpy(modDir, gamedir + dirlen, sizeof(modDir) - dirlen);
+		}
+	}
+
+	if (V_strcmp(modDir, "left4dead2") == 0) {
+		eEngine = k_eL4D2;
+		DEBUG_Msg("This is the L4D2 engine!\n");
+	} else if (V_strcmp(modDir, "left4dead") == 0) {
+		eEngine = k_eL4D1;
+		DEBUG_Msg("This is the L4D1 engine!\n");
+	} else {
+		Warning("Plugin running on an engine different from Left 4 Dead series.\n");
+		return false;
+	}
+
+	engineclient = (IVEngineClient*)interfaceFactory(VENGINE_CLIENT_INTERFACE_VERSION, NULL);
+	pcvar = (ICvar*)interfaceFactory(CVAR_INTERFACE_VERSION, NULL);
+
+	CSigScan gpGlobals_Sig;
+	if (eEngine == k_eL4D2) {
+		tvm.plugin_wpn_sway_cvar = new ConVar("pl_wpn_sway_enabled", "1", FCVAR_CLIENTDLL, "Restores HL2 sway.");
+		tvm.plugin_wpn_sway_scale = new ConVar("pl_wpn_sway_scale", "1.5", FCVAR_CLIENTDLL);
+		tvm.plugin_wpn_sway_interp = new ConVar("pl_wpn_sway_interp", "0.1", FCVAR_CLIENTDLL);
+
+		gpGlobals_Sig.Init((unsigned char*)
+			"\xA3\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x55", "x????x????xx", 12);
+	} 
+	else {
+		tvm.plugin_wpn_sway_cvar = (ConVar*)new ConVar_L4D("pl_wpn_sway_enabled", "1", FCVAR_CLIENTDLL, "Restores HL2 sway.");
+		tvm.plugin_wpn_sway_scale = (ConVar*)new ConVar_L4D("pl_wpn_sway_scale", "1.5", FCVAR_CLIENTDLL);
+		tvm.plugin_wpn_sway_interp = (ConVar*)new ConVar_L4D("pl_wpn_sway_interp", "0.1", FCVAR_CLIENTDLL);
+
+		tvm.plugin_viewmodel_offset_x = (ConVar*)new ConVar_L4D("viewmodel_offset_x", "0.0", FCVAR_CLIENTDLL);
+		tvm.plugin_viewmodel_offset_y = (ConVar*)new ConVar_L4D("viewmodel_offset_y", "0.0", FCVAR_CLIENTDLL);
+		tvm.plugin_viewmodel_offset_z = (ConVar*)new ConVar_L4D("viewmodel_offset_z", "0.0", FCVAR_CLIENTDLL);
+
+		gpGlobals_Sig.Init((unsigned char*)
+			"\xA3\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x54", "x????x????xx", 12);
+	}
+
+	if (!gpGlobals_Sig.is_set) {
+		Warning("Signature scan for 'gpGlobals' failed!\n");
+		return false;
+	}
+
+	gpGlobals = **(CGlobalVars***)((uintptr_t)gpGlobals_Sig.sig_addr + 1);
+
+	return tvm.Setup_TerrorViewModel();
+}
+
+void ClientPlugin_Viewmodel::Viewmodel_Stop()
+{
+	tvm.Shutdown_TerrorViewModel();
+}

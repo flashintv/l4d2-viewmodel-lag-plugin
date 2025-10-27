@@ -237,11 +237,11 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <Outputs>..\..\..\game\bin\serverplugin_empty.dll;..\..\..\game\bin\serverplugin_empty.pdb;%(Outputs)</Outputs>
     </CustomBuildStep>
     <ClCompile>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\..\common;..\..\public;..\..\public\tier0;..\..\public\tier1;..\..\game\server;..\..\game\shared;..\..\game\client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;serverplugin_emptyONLY;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;serverplugin_emptyONLY;_MBCS;_REL_N_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -261,7 +261,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       </BrowseInformation>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <WarningLevel>Level4</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>CompileAsCpp</CompileAs>
       <ErrorReporting>Prompt</ErrorReporting>
       <Optimization>Disabled</Optimization>
@@ -303,7 +303,8 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\public\tier0\memoverride.cpp" />
-    <ClCompile Include="clientplugin_viewmodel.cpp" />
+    <ClCompile Include="clientplugin\clientplugin_viewmodel.cpp" />
+    <ClCompile Include="clientplugin\terrorviewmodel.cpp" />
     <ClCompile Include="cpu.cpp" />
     <ClCompile Include="cputopology.cpp" />
     <ClCompile Include="serverplugin_empty.cpp" />
@@ -337,6 +338,8 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="..\..\public\vstdlib\ICommandLine.h" />
     <ClInclude Include="..\..\public\vstdlib\strtools.h" />
     <ClInclude Include="..\..\public\vstdlib\vstdlib.h" />
+    <ClInclude Include="clientplugin\clientplugin_viewmodel.h" />
+    <ClInclude Include="clientplugin\terrorviewmodel.h" />
     <ClInclude Include="cputopology.h" />
     <ClInclude Include="minhook\MinHook.h" />
     <ClInclude Include="sigscan.h" />

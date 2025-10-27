@@ -16,6 +16,9 @@
     <Filter Include="Source Files\minhook">
       <UniqueIdentifier>{7686fa88-b4b9-4832-8b9a-5520da2de8a7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\clientplugin">
+      <UniqueIdentifier>{86af0367-8fff-47b3-8c44-c5777c65ff17}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\public\tier0\memoverride.cpp">
@@ -30,14 +33,17 @@
     <ClCompile Include="sigscan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clientplugin_viewmodel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="cpu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cputopology.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clientplugin\clientplugin_viewmodel.cpp">
+      <Filter>Source Files\clientplugin</Filter>
+    </ClCompile>
+    <ClCompile Include="clientplugin\terrorviewmodel.cpp">
+      <Filter>Source Files\clientplugin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -126,6 +132,12 @@
     </ClInclude>
     <ClInclude Include="cputopology.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="clientplugin\terrorviewmodel.h">
+      <Filter>Source Files\clientplugin</Filter>
+    </ClInclude>
+    <ClInclude Include="clientplugin\clientplugin_viewmodel.h">
+      <Filter>Source Files\clientplugin</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

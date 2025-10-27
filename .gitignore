@@ -27,6 +27,7 @@ vcpm$
 (^|/)[tT]humbs\.db$
 
 # Release and Debug folders for Projects
+/utils/serverplugin_sample/.vs
 /utils/serverplugin_sample/Release
 /utils/serverplugin_sample/Debug
 /mathlib/Release

@@ -54,7 +54,6 @@ inline void Interpolation_SetLastPacketTimeStamp( float timestamp)
 }
 #endif
 
-
 // Before calling Interpolate(), you can use this use this to setup the context if 
 // you want to enable extrapolation.
 class CInterpolationContext
@@ -659,7 +658,11 @@ inline bool CInterpolatedVarArrayBase<Type, IS_ARRAY>::NoteChanged( float change
 	// changing over to the method in Interpolate() means that we always have a 3-sample neighborhood around
 	// any data we're going to need.  Unless gpGlobals->curtime is different when samples are added vs. when
 	// they are interpolated I can't see this having any ill effects.  
-	RemoveEntriesPreviousTo( gpGlobals->curtime - interpolation_amount - EXTRA_INTERPOLATION_HISTORY_STORED );
+	#ifdef USE_REALTIME
+	RemoveEntriesPreviousTo( gpGlobals->realtime - interpolation_amount - EXTRA_INTERPOLATION_HISTORY_STORED);
+	#else
+	RemoveEntriesPreviousTo(gpGlobals->curtime - interpolation_amount - EXTRA_INTERPOLATION_HISTORY_STORED);
+	#endif
 #endif
 	
 	return bRet;
@@ -738,9 +741,15 @@ inline void CInterpolatedVarArrayBase<Type, IS_ARRAY>::Reset()
 
 	if ( m_pValue )
 	{
-		AddToHead( gpGlobals->curtime, m_pValue, false );
-		AddToHead( gpGlobals->curtime, m_pValue, false );
-		AddToHead( gpGlobals->curtime, m_pValue, false );
+		#ifdef USE_REALTIME
+		AddToHead(gpGlobals->realtime, m_pValue, false);
+		AddToHead(gpGlobals->realtime, m_pValue, false);
+		AddToHead(gpGlobals->realtime, m_pValue, false);
+		#else
+		AddToHead(gpGlobals->curtime, m_pValue, false);
+		AddToHead(gpGlobals->curtime, m_pValue, false);
+		AddToHead(gpGlobals->curtime, m_pValue, false);
+		#endif
 
 		memcpy( m_LastNetworkedValue, m_pValue, m_nMaxCount * sizeof( Type ) );
 	}
