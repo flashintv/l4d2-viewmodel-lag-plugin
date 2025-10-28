@@ -1,4 +1,7 @@
 # Left 4 Dead 1 and 2 client plugin that restores Half-Life 2 viewmodel lag and offset functionality
+[![Github All Releases](https://img.shields.io/github/downloads/flashintv/l4d2-viewmodel-lag-plugin/total.svg)]()
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/flashintv/l4d2-viewmodel-lag-plugin)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/flashintv/l4d2-viewmodel-lag-plugin)
 
 ## Added commands:
   - Both games:
