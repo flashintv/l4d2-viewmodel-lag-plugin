@@ -31,6 +31,7 @@
 #include "utlvector.h"
 #include "terrorviewmodel.h"
 #include "clientplugin_viewmodel.h"
+#include "../serverplugin_empty.h"
 
 #define USE_REALTIME
 #define USE_LASTTIMESTAMP
@@ -44,6 +45,7 @@ ConVar cl_extrapolate_amount = ConVar("", "", FCVAR_HIDDEN);
 
 ESourceEngine eEngine = k_eOther;
 
+CServerPlugin_t* serverplugins = NULL;
 CGlobalVars* gpGlobals = NULL;
 IVEngineClient* engineclient = NULL;
 ICvar* pcvar = NULL;
@@ -82,6 +84,7 @@ bool ClientPlugin_Viewmodel::Viewmodel_Run(CreateInterfaceFn interfaceFactory)
 		return false;
 	}
 
+	serverplugins = (CServerPlugin_t*)interfaceFactory(INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL);
 	engineclient = (IVEngineClient*)interfaceFactory(VENGINE_CLIENT_INTERFACE_VERSION, NULL);
 	pcvar = (ICvar*)interfaceFactory(CVAR_INTERFACE_VERSION, NULL);
 
@@ -122,4 +125,41 @@ void ClientPlugin_Viewmodel::Viewmodel_Stop()
 	}
 
 	tvm.Shutdown_TerrorViewModel();
+}
+
+void ClientPlugin_Viewmodel::Viewmodel_ForceUnload()
+{
+	if (!serverplugins) {
+		Warning("We cannot force unload ourselves! 'serverplugins' is NULL!\n");
+		return;
+	}
+	Warning("Unloading viewmodel lag plugin due to error!\n");
+
+	for (int i = serverplugins->m_Plugins.Count() - 1; i >= 0; --i)
+	{
+		// L4D1 and L4D2 have slightly different CPlugin class structures
+		// found out when L4D2 kept trying to unload a string like a module
+		if (eEngine == k_eL4D1) {
+			auto plugin = &serverplugins->m_Plugins[i]->L4D1;
+			if (!plugin->m_pPlugin) continue;
+			if (plugin->m_pPlugin != g_pViewmodelPlugin) continue;
+
+			plugin->m_pPlugin->Unload();
+			plugin->m_pPlugin = NULL;
+
+			serverplugins->m_Plugins.Remove(i);
+			Sys_UnloadModule(plugin->m_pPluginModule);
+		}
+		else {
+			auto plugin = &serverplugins->m_Plugins[i]->L4D2;
+			if (!plugin->m_pPlugin) continue;
+			if (plugin->m_pPlugin != g_pViewmodelPlugin) continue;
+
+			plugin->m_pPlugin->Unload();
+			plugin->m_pPlugin = NULL;
+
+			serverplugins->m_Plugins.Remove(i);
+			Sys_UnloadModule(plugin->m_pPluginModule);
+		}
+	}
 }

@@ -139,5 +139,8 @@
     <ClInclude Include="clientplugin\clientplugin_viewmodel.h">
       <Filter>Source Files\clientplugin</Filter>
     </ClInclude>
+    <ClInclude Include="serverplugin_empty.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

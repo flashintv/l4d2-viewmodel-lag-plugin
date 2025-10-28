@@ -21,51 +21,24 @@
 #include "engine/IEngineTrace.h"
 #include "tier2/tier2.h"
 #include "utils.h"
+#include "serverplugin_empty.h"
 #include "clientplugin/clientplugin_viewmodel.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 // Interfaces from the engine
-IVEngineServer	*engine = NULL; // helper functions (messaging clients, loading content, making entities, running commands, etc)
-IGameEventManager *gameeventmanager = NULL; // game events interface
-IPlayerInfoManager *playerinfomanager = NULL; // game dll interface to interact with players
-IBotManager *botmanager = NULL; // game dll interface to interact with bots
-IServerPluginHelpers *helpers = NULL; // special 3rd party plugin helpers from the engine
+IVEngineServer	*engine = NULL;
+IGameEventManager *gameeventmanager = NULL;
+IPlayerInfoManager *playerinfomanager = NULL;
 IUniformRandomStream *randomStr = NULL;
-IEngineTrace *enginetrace = NULL;
 
 //---------------------------------------------------------------------------------
 // Purpose: a sample 3rd party plugin class
 //---------------------------------------------------------------------------------
-class CViewmodelPlugin : public IServerPluginCallbacks, public IGameEventListener
-{
-public:
-	CViewmodelPlugin() {};
-	~CViewmodelPlugin() {};
 
-	// IServerPluginCallbacks methods
-	virtual bool			Load(	CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory );
-	virtual void			Unload( void );
-	virtual void			Pause( void ) {};
-	virtual void			UnPause( void ) {};
-	virtual const char     *GetPluginDescription( void );      
-	virtual void			LevelInit( char const *pMapName );
-	virtual void			ServerActivate( edict_t *pEdictList, int edictCount, int clientMax ) {};
-	virtual void			GameFrame( bool simulating ) {};
-	virtual void			LevelShutdown( void );
-	virtual void			ClientActive( edict_t *pEntity ) {};
-	virtual void			ClientDisconnect( edict_t *pEntity ) {};
-	virtual void			ClientPutInServer( edict_t *pEntity, char const *playername ) {};
-	virtual void			SetCommandClient(int index) {};
-	virtual void			ClientSettingsChanged( edict_t *pEdict ) {};
-	virtual PLUGIN_RESULT	ClientConnect( bool *bAllowConnect, edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen ) { return PLUGIN_CONTINUE; };
-	virtual PLUGIN_RESULT	ClientCommand( edict_t *pEntity, const CCommand &args ) { return PLUGIN_CONTINUE; };
-	virtual PLUGIN_RESULT	NetworkIDValidated( const char *pszUserName, const char *pszNetworkID ) { return PLUGIN_CONTINUE; };
-	virtual void			OnQueryCvarValueFinished( QueryCvarCookie_t iCookie, edict_t *pPlayerEntity, EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue ) {};
-	virtual void			FireGameEvent(KeyValues* event) {};
-};
 CViewmodelPlugin g_ViewmodelPlugin;
+CViewmodelPlugin* g_pViewmodelPlugin = &g_ViewmodelPlugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CViewmodelPlugin, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS_VERSION_2, g_ViewmodelPlugin); // use version 2 to support l4d1
 
 // ------------------------------------------
@@ -80,24 +53,18 @@ bool CViewmodelPlugin::Load(	CreateInterfaceFn interfaceFactory, CreateInterface
 	playerinfomanager = (IPlayerInfoManager *)gameServerFactory(INTERFACEVERSION_PLAYERINFOMANAGER, NULL);
 	if ( !playerinfomanager )
 	{
-		Warning( "Unable to load playerinfomanager, ignoring\n" ); // this isn't fatal, we just won't be able to access specific player data
-	}
-
-	botmanager = (IBotManager *)gameServerFactory(INTERFACEVERSION_PLAYERBOTMANAGER, NULL);
-	if ( !botmanager )
-	{
-		Warning( "Unable to load botcontroller, ignoring\n" ); // this isn't fatal, we just won't be able to access specific bot functions
+		Warning( "Unable to load playerinfomanager!\n" ); // this is fatal, because we need global vars!
+		return false;
 	}
 
 	engine = (IVEngineServer*)interfaceFactory(INTERFACEVERSION_VENGINESERVER, NULL);
 	gameeventmanager = (IGameEventManager *)interfaceFactory(INTERFACEVERSION_GAMEEVENTSMANAGER,NULL);
-	helpers = (IServerPluginHelpers*)interfaceFactory(INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL);
-	enginetrace = (IEngineTrace *)interfaceFactory(INTERFACEVERSION_ENGINETRACE_SERVER,NULL);
 	randomStr = (IUniformRandomStream *)interfaceFactory(VENGINE_SERVER_RANDOM_INTERFACE_VERSION, NULL);
 
-	// get the interfaces we want to use (don't check g_pFullFileSystem because this is a partial project)
-	if(	! ( engine && gameeventmanager && helpers && enginetrace && randomStr ) )
+	// get the interfaces we want to use
+	if(	! ( engine && gameeventmanager && randomStr ) )
 	{
+		Warning("Interface list: {%p, %p, %p} - one of them failed!\n", engine , gameeventmanager, randomStr);
 		return false; // we require all these interface to function
 	}
 

@@ -342,6 +342,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="clientplugin\terrorviewmodel.h" />
     <ClInclude Include="cputopology.h" />
     <ClInclude Include="minhook\MinHook.h" />
+    <ClInclude Include="serverplugin_empty.h" />
     <ClInclude Include="sigscan.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

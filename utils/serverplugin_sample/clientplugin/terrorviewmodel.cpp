@@ -8,6 +8,7 @@
 #define USE_LASTTIMESTAMP
 #include "interpolatedvar.h"
 #include <shareddefs.h>
+#include <thread>
 
 CalcViewModelView_t C_BaseViewModel_CalcViewModelView_Original;
 CalcViewModelView_t C_TerrorViewModel_CalcViewModelView_Original;
@@ -61,27 +62,43 @@ void __fastcall C_TerrorViewModel_CalcViewModelView(void* thisptr, void* edx, vo
 	C_TerrorViewModel_CalcViewModelView_Original(thisptr, edx, owner, vmorigin, vmangles);
 }
 
+int iHookCreated = -1;
 bool TerrorViewModel::Setup_TerrorViewModel() 
 {
-	CSigScan C_TerrorViewModel_CalcViewModelView_Sig;
-	if (eEngine == k_eL4D2) {
-		C_TerrorViewModel_CalcViewModelView_Sig.Init((unsigned char*)
-			"\x55\x8B\xEC\x83\xEC\x48\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xFC\x8B\x45\x10\x8B", "xxxxxxx????xxxxxxxxx", 20);
-	}
-	else {
-		C_TerrorViewModel_CalcViewModelView_Sig.Init((unsigned char*)
-			"\x83\xEC\x44\x8B\x44\x24\x50", "xxxxxxx", 7);
-	}
+	std::thread t([]() {
+		// cl_cloud_settings is a convar that by default is set to -1,
+		// but after client gets initialized it gets changed to whatever setting the registry has stored.
+		ConVar* cloud_settings = pcvar->FindVar("cl_cloud_settings");
+		while (cloud_settings->GetInt() == -1) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		}
 
-	if (!C_TerrorViewModel_CalcViewModelView_Sig.is_set) {
-		Warning("Signature scan for 'C_TerrorViewModel_CalcViewModelView' failed!\n");
-		return false;
-	}
+		CSigScan C_TerrorViewModel_CalcViewModelView_Sig;
+		if (eEngine == k_eL4D2) {
+			C_TerrorViewModel_CalcViewModelView_Sig.Init((unsigned char*)
+				"\x55\x8B\xEC\x83\xEC\x48\xA1\x00\x00\x00\x00\x33\xC5\x89\x45\xFC\x8B\x45\x10\x8B", "xxxxxxx????xxxxxxxxx", 20);
+		}
+		else {
+			C_TerrorViewModel_CalcViewModelView_Sig.Init((unsigned char*)
+				"\x83\xEC\x44\x8B\x44\x24\x50", "xxxxxxx", 7);
+		}
+
+		if (!C_TerrorViewModel_CalcViewModelView_Sig.is_set) {
+			Warning("Signature scan for 'C_TerrorViewModel_CalcViewModelView' failed!\n");
+			ClientPlugin_Viewmodel::Viewmodel_ForceUnload();
+			return;
+		}
+
+		static Color good_looking_color(0x9C, 0xE2, 0xC0, 255);
+		pcvar->ConsoleColorPrintf(good_looking_color, "Viewmodel lag has successfully been hooked!\n");
+
+		MH_CreateHook(C_TerrorViewModel_CalcViewModelView_Sig.sig_addr, &C_TerrorViewModel_CalcViewModelView, (LPVOID*)&C_TerrorViewModel_CalcViewModelView_Original);
+		MH_EnableHook(MH_ALL_HOOKS);
+	});
+	t.detach();
+	
 	m_LagAnglesHistory.Setup(&m_vLagAngles, LATCH_SIMULATION_VAR);
-
 	MH_Initialize();
-	MH_CreateHook(C_TerrorViewModel_CalcViewModelView_Sig.sig_addr, &C_TerrorViewModel_CalcViewModelView, (LPVOID*)&C_TerrorViewModel_CalcViewModelView_Original);
-	MH_EnableHook(MH_ALL_HOOKS);
 
 	return true;
 }
