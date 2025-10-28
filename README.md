@@ -1,4 +1,4 @@
-# Left 4 Dead 2 client plugin that restores Half-Life 2 viewmodel lag
+# Left 4 Dead 1 and 2 client plugin that restores Half-Life 2 viewmodel lag and offset functionality
 
 ## Added commands:
   - Both games:
@@ -11,7 +11,7 @@
     - viewmodel_offset_z (default: 0.0)
 
 ## How to run:
-To load the plugin into your game client, put the dll into the "Left 4 Dead 2/bin" folder and run: 
+To load the plugin into your game client, put the dll into the game's bin folder (example: "Steam/steamapps/common/left 4 dead/bin") and run in the console: 
 ```
 plugin_load viewmodel_lag_plugin
 ```
