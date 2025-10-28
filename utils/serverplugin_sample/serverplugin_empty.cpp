@@ -107,6 +107,7 @@ bool CViewmodelPlugin::Load(	CreateInterfaceFn interfaceFactory, CreateInterface
 	}
 
 	MathLib_Init(2.2f, 2.2f, 0.0f, 2);
+	ConVar_Register(0);
 	if (!ClientPlugin_Viewmodel::Viewmodel_Run(interfaceFactory)) {
 		return false;
 	}
@@ -119,6 +120,7 @@ void CViewmodelPlugin::Unload( void )
 	ClientPlugin_Viewmodel::Viewmodel_Stop();
 	gameeventmanager->RemoveListener( this ); // make sure we are unloaded from the event system
 
+	ConVar_Unregister();
 	DisconnectTier2Libraries( );
 	DisconnectTier1Libraries( );
 }

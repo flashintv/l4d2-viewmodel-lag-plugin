@@ -82,20 +82,12 @@ bool TerrorViewModel::Setup_TerrorViewModel()
 	MH_Initialize();
 	MH_CreateHook(C_TerrorViewModel_CalcViewModelView_Sig.sig_addr, &C_TerrorViewModel_CalcViewModelView, (LPVOID*)&C_TerrorViewModel_CalcViewModelView_Original);
 	MH_EnableHook(MH_ALL_HOOKS);
+
+	return true;
 }
 
 void TerrorViewModel::Shutdown_TerrorViewModel()
 {
-	delete plugin_wpn_sway_cvar;
-	delete plugin_wpn_sway_scale;
-	delete plugin_wpn_sway_interp;
-
-	if (eEngine == k_eL4D1) {
-		delete plugin_viewmodel_offset_x;
-		delete plugin_viewmodel_offset_y;
-		delete plugin_viewmodel_offset_z;
-	}
-
 	MH_DisableHook(MH_ALL_HOOKS);
 	MH_Uninitialize();
 }

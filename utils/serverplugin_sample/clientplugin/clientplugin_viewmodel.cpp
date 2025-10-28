@@ -119,5 +119,15 @@ bool ClientPlugin_Viewmodel::Viewmodel_Run(CreateInterfaceFn interfaceFactory)
 
 void ClientPlugin_Viewmodel::Viewmodel_Stop()
 {
+	delete tvm.plugin_wpn_sway_cvar;
+	delete tvm.plugin_wpn_sway_scale;
+	delete tvm.plugin_wpn_sway_interp;
+
+	if (eEngine == k_eL4D1) {
+		delete tvm.plugin_viewmodel_offset_x;
+		delete tvm.plugin_viewmodel_offset_y;
+		delete tvm.plugin_viewmodel_offset_z;
+	}
+
 	tvm.Shutdown_TerrorViewModel();
 }
