@@ -11,15 +11,17 @@
     - viewmodel_offset_z (default: 0.0)
 
 ## How to run:
-To load the plugin into your game client, put the dll into the game's bin folder (example: "Steam/steamapps/common/left 4 dead/bin") and run in the console: 
-```
-plugin_load viewmodel_lag_plugin
-```
-
-To unload the plugin run:
-```
-plugin_unload viewmodel_lag_plugin
-```
+Download the `viewmodel_lag_plugin.dll` from Releases and put it into the game's bin folder (example: "Steam/steamapps/common/left 4 dead/bin")
+>| 1st Method: |
+>|:- |
+>| - To load the plugin, run in the console: |
+>|`plugin_load viewmodel_lag_plugin`
+>| - To unload the plugin run: |
+>|`plugin_unload viewmodel_lag_plugin` |
+>
+>| 2nd Method: |
+>|:- |
+>| Download `viewmodel_lag_plugin.vdf` from Releases and put it within the mod's addons folder (example: "Steam/steamapps/common/left 4 dead/left4dead/addons"), the game will automatically load the plugin on startup. |
 
 Running the plugin on a dedicated server, doesn't do anything - this plugin is made for the client only.
 
