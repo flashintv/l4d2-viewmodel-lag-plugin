@@ -91,8 +91,9 @@ bool ClientPlugin_Viewmodel::Viewmodel_Run(CreateInterfaceFn interfaceFactory)
 		tvm.plugin_wpn_sway_scale = new ConVar("pl_wpn_sway_scale", "1.5", FCVAR_CLIENTDLL);
 		tvm.plugin_wpn_sway_interp = new ConVar("pl_wpn_sway_interp", "0.1", FCVAR_CLIENTDLL);
 
-		gpGlobals_Sig.Init((unsigned char*)
-			"\xA3\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x55", "x????x????xx", 12);
+		tvm.plugin_viewmodel_offset_x = cvar->FindVar("viewmodel_offset_x");
+		tvm.plugin_viewmodel_offset_y = cvar->FindVar("viewmodel_offset_y");
+		tvm.plugin_viewmodel_offset_z = cvar->FindVar("viewmodel_offset_z");
 	} 
 	else {
 		tvm.plugin_wpn_sway_cvar = (ConVar*)new ConVar_L4D("pl_wpn_sway_enabled", "1", FCVAR_CLIENTDLL, "Restores HL2 sway.");
@@ -102,17 +103,7 @@ bool ClientPlugin_Viewmodel::Viewmodel_Run(CreateInterfaceFn interfaceFactory)
 		tvm.plugin_viewmodel_offset_x = (ConVar*)new ConVar_L4D("viewmodel_offset_x", "0.0", FCVAR_CLIENTDLL);
 		tvm.plugin_viewmodel_offset_y = (ConVar*)new ConVar_L4D("viewmodel_offset_y", "0.0", FCVAR_CLIENTDLL);
 		tvm.plugin_viewmodel_offset_z = (ConVar*)new ConVar_L4D("viewmodel_offset_z", "0.0", FCVAR_CLIENTDLL);
-
-		gpGlobals_Sig.Init((unsigned char*)
-			"\xA3\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x54", "x????x????xx", 12);
 	}
-
-	if (!gpGlobals_Sig.is_set) {
-		Warning("Signature scan for 'gpGlobals' failed!\n");
-		return false;
-	}
-
-	gpGlobals = **(CGlobalVars***)((uintptr_t)gpGlobals_Sig.sig_addr + 1);
 
 	return tvm.Setup_TerrorViewModel();
 }
@@ -123,7 +114,8 @@ void ClientPlugin_Viewmodel::Viewmodel_Stop()
 	delete tvm.plugin_wpn_sway_scale;
 	delete tvm.plugin_wpn_sway_interp;
 
-	if (eEngine == k_eL4D1) {
+	// Only delete these in L4D1 because game creates them in L4D2
+	if (eEngine == k_eL4D1) { 
 		delete tvm.plugin_viewmodel_offset_x;
 		delete tvm.plugin_viewmodel_offset_y;
 		delete tvm.plugin_viewmodel_offset_z;

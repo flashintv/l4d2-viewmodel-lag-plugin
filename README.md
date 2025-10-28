@@ -18,8 +18,7 @@ plugin_load viewmodel_lag_plugin
 
 To unload the plugin run:
 ```
-plugin_print
-plugin_unload INDEX_OF_THE_VIEWMODEL_PLUGIN_HERE 
+plugin_unload viewmodel_lag_plugin
 ```
 
 Running the plugin on a dedicated server, doesn't do anything - this plugin is made for the client only.

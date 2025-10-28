@@ -74,8 +74,8 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CViewmodelPlugin, IServerPluginCallbacks, INTE
 
 bool CViewmodelPlugin::Load(	CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory )
 {
-	ConnectTier1Libraries( &interfaceFactory, 1 );
-	ConnectTier2Libraries( &interfaceFactory, 1 );
+	ConnectTier1Libraries(&interfaceFactory, 1);
+	ConnectTier2Libraries(&interfaceFactory, 1);
 
 	playerinfomanager = (IPlayerInfoManager *)gameServerFactory(INTERFACEVERSION_PLAYERINFOMANAGER, NULL);
 	if ( !playerinfomanager )
@@ -117,12 +117,12 @@ bool CViewmodelPlugin::Load(	CreateInterfaceFn interfaceFactory, CreateInterface
 
 void CViewmodelPlugin::Unload( void )
 {
-	ClientPlugin_Viewmodel::Viewmodel_Stop();
 	gameeventmanager->RemoveListener( this ); // make sure we are unloaded from the event system
 
 	ConVar_Unregister();
-	DisconnectTier2Libraries( );
-	DisconnectTier1Libraries( );
+	DisconnectTier2Libraries();
+	DisconnectTier1Libraries();
+	ClientPlugin_Viewmodel::Viewmodel_Stop();
 }
 
 const char *CViewmodelPlugin::GetPluginDescription( void )

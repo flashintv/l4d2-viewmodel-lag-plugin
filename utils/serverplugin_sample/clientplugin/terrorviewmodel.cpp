@@ -50,7 +50,7 @@ void __fastcall C_TerrorViewModel_CalcViewModelView(void* thisptr, void* edx, vo
 	Vector vmorigin = eyePosition;
 
 	CalcViewModelLag(vmorigin, vmangles, vmangoriginal);
-	if (eEngine == k_eL4D1) {
+	{	// Restore viewmodel offset
 		Vector vecRight, vecUp, vecForward;
 		AngleVectors(vmangoriginal, &vecForward, &vecRight, &vecUp);
 
